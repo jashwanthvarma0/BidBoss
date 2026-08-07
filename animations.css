@@ -1,0 +1,59 @@
+/* ============================================================
+   BIDBOSS — animations.css
+   All @keyframes in one place.
+   ============================================================ */
+
+@keyframes gridDrift {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 46px 46px, 46px 46px; }
+}
+
+@keyframes tickerScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
+}
+
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(0.94) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; } 50% { opacity: 0.35; }
+}
+
+@keyframes pulseScale {
+  0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); } to { transform: rotate(360deg); }
+}
+
+@keyframes shineSweep {
+  0% { transform: translateX(-30%) rotate(0deg); }
+  100% { transform: translateX(30%) rotate(0deg); }
+}
+
+@keyframes stampIn {
+  0% { opacity: 0; transform: scale(0.4) rotate(-8deg); }
+  60% { opacity: 1; transform: scale(1.12) rotate(2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes flashGold {
+  from { opacity: 1; } to { opacity: 0; }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes toastOut {
+  to { opacity: 0; transform: translateX(30px); }
+}

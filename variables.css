@@ -1,0 +1,50 @@
+/* ============================================================
+   BIDBOSS — variables.css
+   Design tokens. Financial-terminal-meets-auction-house palette:
+   near-black void, graphite panels, electric green for "live"
+   data, gold reserved strictly for premium/legendary moments.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* surfaces */
+  --void: #07090a;
+  --void-2: #0a0d0c;
+  --panel: #101412;
+  --panel-2: #161c19;
+  --panel-3: #1c231f;
+  --border: rgba(230, 240, 232, 0.08);
+  --border-strong: rgba(230, 240, 232, 0.14);
+
+  /* text */
+  --text: #eef3ee;
+  --text-dim: #9aa79f;
+  --text-faint: #66716a;
+
+  /* brand accents */
+  --green: #17ffa0;
+  --green-dim: #0a3d2a;
+  --green-glow: rgba(23, 255, 160, 0.35);
+  --gold: #eecb7a;
+  --gold-deep: #b8933a;
+  --gold-glow: rgba(238, 203, 122, 0.4);
+  --red: #ff5470;
+  --red-dim: #401820;
+
+  /* type */
+  --font-display: 'Chakra Petch', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-body: 'Manrope', sans-serif;
+
+  /* radii + shadow */
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 22px;
+  --shadow-panel: 0 20px 60px -20px rgba(0, 0, 0, 0.6);
+  --shadow-gold: 0 0 40px -6px var(--gold-glow);
+
+  /* layout */
+  --topbar-h: 76px;
+  --max-w: 1240px;
+}

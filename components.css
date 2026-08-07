@@ -1,0 +1,386 @@
+/* ============================================================
+   BIDBOSS — components.css
+   Every reusable visual component: nav, cards, chips, modals,
+   auction panel, tables, rank card, toasts.
+   ============================================================ */
+
+/* ---------------- MENU PLAY BUTTON ---------------- */
+.btn-play {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 14px;
+  padding: 16px 34px;
+  border-radius: 100px;
+  background: linear-gradient(120deg, var(--green), #0fd98a);
+  color: var(--void);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  box-shadow: 0 0 0 1px rgba(23,255,160,0.3), 0 20px 50px -14px var(--green-glow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-play:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(23,255,160,0.5), 0 26px 60px -14px var(--green-glow); }
+.btn-play svg { transition: transform 0.2s ease; }
+.btn-play:hover svg { transform: translateX(3px); }
+
+/* ---------------- BRAND / NAV ---------------- */
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark {
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--green), #0a8f5f);
+  color: var(--void);
+  font-family: var(--font-display);
+  font-weight: 700;
+  border-radius: 9px;
+}
+.brand-name { font-family: var(--font-display); font-weight: 700; letter-spacing: 0.04em; font-size: 17px; }
+
+.topnav { display: flex; gap: 4px; flex: 1; }
+.nav-item {
+  padding: 9px 16px;
+  border-radius: 100px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-dim);
+  transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+.nav-item:hover { color: var(--text); background: var(--panel-2); }
+.nav-item.nav-active { color: var(--void); background: var(--green); }
+
+.topbar-stats { display: flex; gap: 10px; }
+.stat-pill {
+  display: flex; flex-direction: column;
+  padding: 6px 14px;
+  border-radius: var(--r-sm);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  min-width: 96px;
+}
+.stat-label { font-size: 10px; color: var(--text-faint); letter-spacing: 0.06em; text-transform: uppercase; }
+.stat-value { font-family: var(--font-mono); font-size: 14px; font-weight: 600; }
+.rank-value { color: var(--gold); }
+.worth-pill .stat-value { color: var(--green); }
+
+/* ---------------- CHIPS / FILTERS ---------------- */
+.chip {
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  transition: all 0.15s ease;
+}
+.chip:hover { border-color: var(--border-strong); color: var(--text); }
+.chip-active { background: var(--green-dim); border-color: var(--green); color: var(--green); }
+
+/* ---------------- EVENT BANNER ---------------- */
+.event-banner {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 18px;
+  border-radius: var(--r-md);
+  background: linear-gradient(90deg, rgba(238,203,122,0.1), transparent);
+  border: 1px solid rgba(238,203,122,0.25);
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.event-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 10px var(--gold-glow); animation: pulse 1.6s infinite; flex-shrink: 0; }
+.event-text strong { color: var(--gold); }
+
+/* ---------------- PRODUCT CARD ---------------- */
+.product-card {
+  background: linear-gradient(160deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px;
+  display: flex; flex-direction: column; gap: 12px;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  cursor: pointer;
+}
+.product-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-panel);
+}
+.product-card-top { display: flex; align-items: flex-start; gap: 10px; }
+.product-cat-icon {
+  width: 34px; height: 34px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--panel-3); border-radius: 9px;
+  color: var(--green); font-size: 15px;
+}
+.product-name-block { flex: 1; min-width: 0; }
+.product-name { font-weight: 700; font-size: 14.5px; line-height: 1.25; }
+.product-cat { font-size: 11px; color: var(--text-faint); text-transform: capitalize; }
+.product-trend { font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.trend-up { color: var(--green); }
+.trend-down { color: var(--red); }
+.trend-flat { color: var(--text-faint); }
+
+.spark { width: 100%; height: 36px; display: block; }
+
+.product-card-bottom { display: flex; align-items: baseline; justify-content: space-between; }
+.product-price { font-family: var(--font-mono); font-size: 18px; font-weight: 700; }
+.owned-tag { font-size: 11px; color: var(--gold); background: rgba(238,203,122,0.08); padding: 3px 8px; border-radius: 100px; }
+
+.product-actions { display: flex; gap: 8px; }
+.btn-mini {
+  flex: 1;
+  padding: 9px 0;
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--border);
+  transition: all 0.15s ease;
+}
+.btn-buy { color: var(--green); }
+.btn-buy:hover { background: var(--green-dim); border-color: var(--green); }
+.btn-sell { color: var(--red); }
+.btn-sell:hover { background: var(--red-dim); border-color: var(--red); }
+.btn-mini:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-reset { color: var(--text-faint); margin-top: 10px; max-width: 200px; }
+.btn-reset:hover { color: var(--red); border-color: var(--red); }
+
+/* ---------------- MODAL ---------------- */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(4, 6, 5, 0.72);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200;
+  animation: fadeIn 0.15s ease;
+  padding: 20px;
+}
+.modal-card {
+  width: 100%; max-width: 380px;
+  background: linear-gradient(160deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  padding: 26px;
+  box-shadow: var(--shadow-panel);
+  animation: modalPop 0.2s ease;
+}
+.modal-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; }
+.modal-eyebrow { font-size: 11px; letter-spacing: 0.12em; color: var(--text-faint); }
+.modal-title { font-family: var(--font-display); font-size: 20px; font-weight: 600; margin-top: 4px; }
+.modal-close { font-size: 22px; color: var(--text-faint); line-height: 1; }
+.modal-close:hover { color: var(--text); }
+.modal-price { font-family: var(--font-mono); font-size: 22px; font-weight: 700; margin-bottom: 18px; }
+.modal-price span { font-size: 12px; color: var(--text-faint); font-weight: 400; }
+.modal-label { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; }
+.qty-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.qty-btn { width: 38px; height: 38px; border-radius: var(--r-sm); background: var(--panel-3); font-size: 18px; }
+.qty-btn:hover { background: var(--border-strong); }
+.qty-input { flex: 1; text-align: center; font-size: 16px; padding: 10px; }
+.link-btn { margin-top: 8px; font-size: 12px; color: var(--green); text-decoration: underline; }
+.modal-total { display: flex; justify-content: space-between; margin: 18px 0; font-size: 14px; color: var(--text-dim); }
+#modalTotal { color: var(--text); font-family: var(--font-mono); font-weight: 700; }
+.btn-confirm {
+  width: 100%; padding: 14px 0;
+  border-radius: var(--r-sm);
+  font-family: var(--font-display);
+  font-weight: 600; font-size: 14px; letter-spacing: 0.04em;
+}
+.btn-confirm-buy { background: var(--green); color: var(--void); }
+.btn-confirm-buy:hover { filter: brightness(1.1); }
+.btn-confirm-sell { background: var(--red); color: var(--void); }
+.btn-confirm-sell:hover { filter: brightness(1.1); }
+
+/* ---------------- AUCTIONS ---------------- */
+.auction-idle {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 90px 20px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--r-lg);
+  gap: 14px;
+}
+.auction-idle-ring {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  border: 3px solid var(--panel-3);
+  border-top-color: var(--green);
+  animation: spin 1.4s linear infinite;
+}
+.auction-idle-text { font-size: 16px; font-weight: 600; }
+.auction-idle-sub { color: var(--text-faint); font-size: 13px; }
+
+.auction-main {
+  background: linear-gradient(160deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 30px;
+}
+.lot-eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.1em; }
+.lot-name { font-family: var(--font-display); font-size: 30px; font-weight: 700; margin-top: 4px; }
+.lot-est { color: var(--text-dim); font-size: 13px; margin-top: 6px; }
+.lot-est strong { color: var(--gold); }
+
+.auction-timer { display: flex; justify-content: center; margin: 28px 0; }
+.timer-ring {
+  width: 110px; height: 110px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 24px; font-weight: 700;
+  background: conic-gradient(var(--green) var(--progress), var(--panel-3) 0);
+  transition: background 0.9s linear;
+}
+.timer-ring::before {
+  content: ""; position: absolute;
+}
+.timer-ring span { background: var(--void); width: 86px; height: 86px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.timer-critical .timer-ring { background: conic-gradient(var(--red) var(--progress), var(--panel-3) 0); animation: pulseScale 0.6s infinite; }
+
+.current-bid-block { text-align: center; margin-bottom: 22px; }
+.current-bid-label { font-size: 12px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; }
+.you-lead { color: var(--gold); }
+.current-bid-amount { display: block; font-family: var(--font-mono); font-size: 36px; font-weight: 700; margin-top: 4px; }
+
+.bid-controls { display: flex; gap: 10px; margin-bottom: 12px; }
+.btn-bid {
+  flex: 1; padding: 14px 0;
+  border-radius: var(--r-sm);
+  background: var(--green); color: var(--void);
+  font-family: var(--font-display); font-weight: 700; font-size: 13.5px;
+}
+.btn-bid:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.btn-bid-alt { background: var(--gold); }
+.custom-bid-row { display: flex; gap: 8px; }
+.custom-bid-row input { flex: 1; }
+
+.auction-side { display: flex; flex-direction: column; gap: 10px; }
+.side-title { font-size: 12px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 6px; }
+.bidder-list { display: flex; flex-direction: column; gap: 8px; }
+.bidder-chip {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px;
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--r-sm);
+  font-size: 13px;
+}
+.bidder-name { font-weight: 600; }
+.bidder-tag { font-size: 11px; color: var(--text-faint); }
+.bidder-leading { border-color: var(--gold); background: rgba(238,203,122,0.06); }
+.bidder-leading .bidder-name { color: var(--gold); }
+
+.bid-log { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; }
+.bid-log-row {
+  display: flex; justify-content: space-between;
+  font-family: var(--font-mono); font-size: 12.5px;
+  padding: 6px 10px;
+  background: var(--panel);
+  border-radius: 6px;
+  color: var(--text-dim);
+}
+.bid-log-player { color: var(--green); background: var(--green-dim); }
+
+/* ---------------- BIDBOSS MOMENT ---------------- */
+.bidboss-backdrop { background: rgba(2,4,3,0.85); }
+.bidboss-card {
+  position: relative;
+  width: 100%; max-width: 420px;
+  background: linear-gradient(165deg, #14140d, #0c0d0a);
+  border: 1px solid var(--gold-deep);
+  border-radius: var(--r-lg);
+  padding: 34px;
+  text-align: center;
+  box-shadow: var(--shadow-gold), var(--shadow-panel);
+  overflow: hidden;
+  animation: modalPop 0.3s cubic-bezier(.2,.9,.3,1.3);
+}
+.bidboss-shine {
+  position: absolute; top: -50%; left: -20%;
+  width: 140%; height: 200%;
+  background: linear-gradient(75deg, transparent 40%, rgba(238,203,122,0.15) 50%, transparent 60%);
+  animation: shineSweep 2.4s ease-in-out infinite;
+}
+.bidboss-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.2em; color: var(--text-faint); position: relative; }
+.bidboss-you-won { font-family: var(--font-display); font-size: 15px; color: var(--gold); letter-spacing: 0.15em; margin-top: 8px; position: relative; }
+.bidboss-lot-name { font-family: var(--font-display); font-size: 26px; font-weight: 700; margin-top: 10px; position: relative; }
+.bidboss-row { display: flex; justify-content: space-around; margin: 22px 0; position: relative; }
+.bidboss-figure { display: flex; flex-direction: column; gap: 4px; }
+.bidboss-figure span { font-size: 11px; color: var(--text-faint); text-transform: uppercase; }
+.bidboss-figure strong { font-family: var(--font-mono); font-size: 18px; }
+.bidboss-gain { font-family: var(--font-mono); font-weight: 700; font-size: 15px; margin-bottom: 20px; position: relative; }
+.gain-pos { color: var(--green); }
+.gain-neg { color: var(--red); }
+.bidboss-stamp {
+  font-family: var(--font-display); font-weight: 700; font-size: 42px;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 30px var(--gold-glow);
+  margin-bottom: 22px;
+  position: relative;
+  animation: stampIn 0.5s cubic-bezier(.2,.9,.3,1.4) 0.15s both;
+}
+.bidboss-card .btn-confirm { position: relative; }
+
+/* ---------------- TOASTS ---------------- */
+.toast {
+  padding: 14px 18px;
+  border-radius: var(--r-md);
+  background: var(--panel-2);
+  border: 1px solid var(--border-strong);
+  font-size: 13px;
+  max-width: 320px;
+  box-shadow: var(--shadow-panel);
+  animation: toastIn 0.25s ease;
+}
+.toast-out { animation: toastOut 0.4s ease forwards; }
+.toast-lost { border-left: 3px solid var(--red); }
+.toast-error { border-left: 3px solid var(--red); color: var(--red); }
+
+/* ---------------- TABLES ---------------- */
+.empire-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.empire-table th {
+  text-align: left; padding: 12px 16px;
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-faint);
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.empire-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.empire-table tr:last-child td { border-bottom: none; }
+.empire-table tbody tr:hover { background: var(--panel); }
+.table-name { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.empty-state { padding: 50px 20px; text-align: center; color: var(--text-faint); border: 1px dashed var(--border-strong); border-radius: var(--r-lg); }
+
+.board-row-player { background: rgba(23,255,160,0.05); }
+.board-rank { font-family: var(--font-mono); color: var(--text-faint); }
+.board-tag { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+.board-worth { font-family: var(--font-mono); font-weight: 700; color: var(--green); }
+.you-badge { font-size: 10px; background: var(--green); color: var(--void); padding: 2px 6px; border-radius: 100px; margin-left: 6px; }
+
+/* ---------------- RANK CARD ---------------- */
+.rank-card {
+  background: linear-gradient(160deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+}
+.rank-card-top { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px; }
+.rank-card-eyebrow { font-size: 11px; color: var(--text-faint); letter-spacing: 0.08em; }
+.rank-card-title { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--gold); margin-top: 4px; }
+.rank-card-next { font-size: 13px; color: var(--text-dim); }
+.rank-card-next strong { color: var(--text); }
+.rank-bar { height: 8px; background: var(--panel-3); border-radius: 100px; overflow: hidden; }
+.rank-bar-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--gold)); border-radius: 100px; transition: width 0.4s ease; }
+.rank-card-sub { margin-top: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); }
+
+.profile-stat {
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--r-md);
+  padding: 16px; display: flex; flex-direction: column; gap: 6px;
+  font-size: 12px; color: var(--text-faint);
+}
+.profile-stat span { font-family: var(--font-mono); font-size: 20px; color: var(--text); font-weight: 700; }
+
+.history-list { display: flex; flex-direction: column; gap: 6px; }
+.history-row {
+  display: flex; justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--panel);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+}
+.history-label { color: var(--text-dim); }

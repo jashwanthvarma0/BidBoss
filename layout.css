@@ -1,0 +1,175 @@
+/* ============================================================
+   BIDBOSS — layout.css
+   Structural layout: main menu, app shell (topbar + content),
+   grids for the market/tables.
+   ============================================================ */
+
+/* ---------------- MAIN MENU ---------------- */
+.menu-screen {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.menu-bg {
+  position: absolute; inset: 0;
+  background: var(--void);
+}
+
+.menu-grid {
+  position: absolute; inset: -2px;
+  background-image:
+    linear-gradient(rgba(23,255,160,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23,255,160,0.05) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 20%, transparent 75%);
+  animation: gridDrift 26s linear infinite;
+}
+
+.ticker-row {
+  position: absolute;
+  bottom: 40px; left: 0; right: 0;
+  display: flex;
+  gap: 40px;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-faint);
+  animation: tickerScroll 38s linear infinite;
+  padding-left: 100%;
+}
+
+.menu-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 40px;
+}
+
+.menu-badge {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.25em;
+  color: var(--green);
+  border: 1px solid var(--green-dim);
+  background: rgba(23,255,160,0.06);
+  padding: 6px 16px;
+  border-radius: 100px;
+}
+
+.menu-title {
+  font-size: clamp(56px, 12vw, 128px);
+  font-weight: 700;
+  line-height: 0.95;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.menu-title-accent {
+  background: linear-gradient(120deg, var(--green), #6ffcc9 60%, var(--green));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.menu-tagline {
+  font-family: var(--font-mono);
+  font-size: clamp(14px, 2vw, 20px);
+  letter-spacing: 0.3em;
+  color: var(--text-dim);
+  margin-top: -6px;
+}
+.tagline-dominate { color: var(--gold); }
+
+.menu-stats {
+  display: flex;
+  gap: 36px;
+  margin-top: 20px;
+}
+.menu-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 11px;
+  color: var(--text-faint);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.menu-stat span {
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ---------------- APP SHELL ---------------- */
+.topbar {
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 0 32px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(10, 13, 12, 0.85);
+  backdrop-filter: blur(14px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.app-main {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+.screen-inner { display: flex; flex-direction: column; gap: 18px; }
+
+.screen-head h2 {
+  font-size: 26px;
+  font-weight: 600;
+}
+.screen-head h3 { font-size: 18px; color: var(--text-dim); }
+.screen-sub { color: var(--text-faint); font-size: 14px; margin-top: 4px; }
+
+.chip-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.auction-live {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 22px;
+}
+@media (max-width: 860px) {
+  .auction-live { grid-template-columns: 1fr; }
+  .topbar { flex-wrap: wrap; height: auto; padding: 14px 18px; gap: 14px; }
+  .topnav { order: 3; width: 100%; overflow-x: auto; }
+}
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--r-md); }
+
+.profile-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.toast-slot {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 300;
+}

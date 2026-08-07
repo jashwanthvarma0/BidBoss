@@ -1,0 +1,67 @@
+/* ============================================================
+   BIDBOSS — base.css
+   Resets + global element defaults.
+   ============================================================ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--void);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+body {
+  background-image:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(23,255,160,0.06), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 0%, rgba(238,203,122,0.05), transparent 55%);
+  background-attachment: fixed;
+}
+
+body.flash-gold::after {
+  content: "";
+  position: fixed; inset: 0;
+  background: radial-gradient(circle at 50% 40%, rgba(238,203,122,0.25), transparent 65%);
+  pointer-events: none;
+  z-index: 999;
+  animation: flashGold 0.7s ease-out forwards;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+input {
+  font-family: var(--font-mono);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+}
+input:focus { outline: none; border-color: var(--green); }
+
+/* remove number spinner clutter, keep it clean/terminal-like */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { opacity: 0.4; }
+
+h1, h2, h3 { font-family: var(--font-display); letter-spacing: 0.01em; }
+
+::selection { background: var(--green); color: var(--void); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--panel-3); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+#app { min-height: 100%; }
+
+.pl-pos { color: var(--green); }
+.pl-neg { color: var(--red); }
