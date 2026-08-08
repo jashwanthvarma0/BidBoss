@@ -1,1 +1,1899 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BIDBOSS — Bid. Trade. Dominate.</title>
+<meta name="description" content="BIDBOSS: a global trading, auction and business tycoon simulation.">
+<style>
+/* ============================================================
+   BIDBOSS — variables.css
+   Design tokens. Financial-terminal-meets-auction-house palette:
+   near-black void, graphite panels, electric green for "live"
+   data, gold reserved strictly for premium/legendary moments.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* surfaces */
+  --void: #07090a;
+  --void-2: #0a0d0c;
+  --panel: #101412;
+  --panel-2: #161c19;
+  --panel-3: #1c231f;
+  --border: rgba(230, 240, 232, 0.08);
+  --border-strong: rgba(230, 240, 232, 0.14);
+
+  /* text */
+  --text: #eef3ee;
+  --text-dim: #9aa79f;
+  --text-faint: #66716a;
+
+  /* brand accents */
+  --green: #17ffa0;
+  --green-dim: #0a3d2a;
+  --green-glow: rgba(23, 255, 160, 0.35);
+  --gold: #eecb7a;
+  --gold-deep: #b8933a;
+  --gold-glow: rgba(238, 203, 122, 0.4);
+  --red: #ff5470;
+  --red-dim: #401820;
+
+  /* type */
+  --font-display: 'Chakra Petch', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-body: 'Manrope', sans-serif;
+
+  /* radii + shadow */
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 22px;
+  --shadow-panel: 0 20px 60px -20px rgba(0, 0, 0, 0.6);
+  --shadow-gold: 0 0 40px -6px var(--gold-glow);
+
+  /* layout */
+  --topbar-h: 76px;
+  --max-w: 1240px;
+}
+/* ============================================================
+   BIDBOSS — base.css
+   Resets + global element defaults.
+   ============================================================ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--void);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+body {
+  background-image:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(23,255,160,0.06), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 0%, rgba(238,203,122,0.05), transparent 55%);
+  background-attachment: fixed;
+}
+
+body.flash-gold::after {
+  content: "";
+  position: fixed; inset: 0;
+  background: radial-gradient(circle at 50% 40%, rgba(238,203,122,0.25), transparent 65%);
+  pointer-events: none;
+  z-index: 999;
+  animation: flashGold 0.7s ease-out forwards;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+input {
+  font-family: var(--font-mono);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+}
+input:focus { outline: none; border-color: var(--green); }
+
+/* remove number spinner clutter, keep it clean/terminal-like */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { opacity: 0.4; }
+
+h1, h2, h3 { font-family: var(--font-display); letter-spacing: 0.01em; }
+
+::selection { background: var(--green); color: var(--void); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--panel-3); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+#app { min-height: 100%; }
+
+.pl-pos { color: var(--green); }
+.pl-neg { color: var(--red); }
+/* ============================================================
+   BIDBOSS — layout.css
+   Structural layout: main menu, app shell (topbar + content),
+   grids for the market/tables.
+   ============================================================ */
+
+/* ---------------- MAIN MENU ---------------- */
+.menu-screen {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.menu-bg {
+  position: absolute; inset: 0;
+  background: var(--void);
+}
+
+.menu-grid {
+  position: absolute; inset: -2px;
+  background-image:
+    linear-gradient(rgba(23,255,160,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23,255,160,0.05) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 20%, transparent 75%);
+  animation: gridDrift 26s linear infinite;
+}
+
+.ticker-row {
+  position: absolute;
+  bottom: 40px; left: 0; right: 0;
+  display: flex;
+  gap: 40px;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-faint);
+  animation: tickerScroll 38s linear infinite;
+  padding-left: 100%;
+}
+
+.menu-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 40px;
+}
+
+.menu-badge {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.25em;
+  color: var(--green);
+  border: 1px solid var(--green-dim);
+  background: rgba(23,255,160,0.06);
+  padding: 6px 16px;
+  border-radius: 100px;
+}
+
+.menu-title {
+  font-size: clamp(56px, 12vw, 128px);
+  font-weight: 700;
+  line-height: 0.95;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.menu-title-accent {
+  background: linear-gradient(120deg, var(--green), #6ffcc9 60%, var(--green));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.menu-tagline {
+  font-family: var(--font-mono);
+  font-size: clamp(14px, 2vw, 20px);
+  letter-spacing: 0.3em;
+  color: var(--text-dim);
+  margin-top: -6px;
+}
+.tagline-dominate { color: var(--gold); }
+
+.menu-stats {
+  display: flex;
+  gap: 36px;
+  margin-top: 20px;
+}
+.menu-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 11px;
+  color: var(--text-faint);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.menu-stat span {
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ---------------- APP SHELL ---------------- */
+.topbar {
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 0 32px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(10, 13, 12, 0.85);
+  backdrop-filter: blur(14px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.app-main {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+.screen-inner { display: flex; flex-direction: column; gap: 18px; }
+
+.screen-head h2 {
+  font-size: 26px;
+  font-weight: 600;
+}
+.screen-head h3 { font-size: 18px; color: var(--text-dim); }
+.screen-sub { color: var(--text-faint); font-size: 14px; margin-top: 4px; }
+
+.chip-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.auction-live {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 22px;
+}
+@media (max-width: 860px) {
+  .auction-live { grid-template-columns: 1fr; }
+  .topbar { flex-wrap: wrap; height: auto; padding: 14px 18px; gap: 14px; }
+  .topnav { order: 3; width: 100%; overflow-x: auto; }
+}
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--r-md); }
+
+.profile-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.toast-slot {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 300;
+}
+/* ============================================================
+   BIDBOSS — components.css
+   Every reusable visual component: nav, cards, chips, modals,
+   auction panel, tables, rank card, toasts.
+   ============================================================ */
+
+/* ---------------- MENU PLAY BUTTON ---------------- */
+.btn-play {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 14px;
+  padding: 16px 34px;
+  border-radius: 100px;
+  background: linear-gradient(120deg, var(--green), #0fd98a);
+  color: var(--void);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  box-shadow: 0 0 0 1px rgba(23,255,160,0.3), 0 20px 50px -14px var(--green-glow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-play:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(23,255,160,0.5), 0 26px 60px -14px var(--green-glow); }
+.btn-play svg { transition: transform 0.2s ease; }
+.btn-play:hover svg { transform: translateX(3px); }
+
+/* ---------------- BRAND / NAV ---------------- */
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark {
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--green), #0a8f5f);
+  color: var(--void);
+  font-family: var(--font-display);
+  font-weight: 700;
+  border-radius: 9px;
+}
+.brand-name { font-family: var(--font-display); font-weight: 700; letter-spacing: 0.04em; font-size: 17px; }
+
+.topnav { display: flex; gap: 4px; flex: 1; }
+.nav-item {
+  padding: 9px 16px;
+  border-radius: 100px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-dim);
+  transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+.nav-item:hover { color: var(--text); background: var(--panel-2); }
+.nav-item.nav-active { color: var(--void); background: var(--green); }
+
+.topbar-stats { display: flex; gap: 10px; }
+.stat-pill {
+  display: flex; flex-direction: column;
+  padding: 6px 14px;
+  border-radius: var(--r-sm);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  min-width: 96px;
+}
+.stat-label { font-size: 10px; color: var(--text-faint); letter-spacing: 0.06em; text-transform: uppercase; }
+.stat-value { font-family: var(--font-mono); font-size: 14px; font-weight: 600; }
+.rank-value { color: var(--gold); }
+.worth-pill .stat-value { color: var(--green); }
+
+/* ---------------- CHIPS / FILTERS ---------------- */
+.chip {
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  transition: all 0.15s ease;
+}
+.chip:hover { border-color: var(--border-strong); color: var(--text); }
+.chip-active { background: var(--green-dim); border-color: var(--green); color: var(--green); }
+
+/* ---------------- EVENT BANNER ---------------- */
+.event-banner {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 18px;
+  border-radius: var(--r-md);
+  background: linear-gradient(90deg, rgba(238,203,122,0.1), transparent);
+  border: 1px solid rgba(238,203,122,0.25);
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.event-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 10px var(--gold-glow); animation: pulse 1.6s infinite; flex-shrink: 0; }
+.event-text strong { color: var(--gold); }
+
+/* ---------------- PRODUCT CARD ---------------- */
+.product-card {
+  background: linear-gradient(160deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px;
+  display: flex; flex-direction: column; gap: 12px;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  cursor: pointer;
+}
+.product-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-panel);
+}
+.product-card-top { display: flex; align-items: flex-start; gap: 10px; }
+.product-cat-icon {
+  width: 34px; height: 34px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--panel-3); border-radius: 9px;
+  color: var(--green); font-size: 15px;
+}
+.product-name-block { flex: 1; min-width: 0; }
+.product-name { font-weight: 700; font-size: 14.5px; line-height: 1.25; }
+.product-cat { font-size: 11px; color: var(--text-faint); text-transform: capitalize; }
+.product-trend { font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.trend-up { color: var(--green); }
+.trend-down { color: var(--red); }
+.trend-flat { color: var(--text-faint); }
+
+.spark { width: 100%; height: 36px; display: block; }
+
+.product-card-bottom { display: flex; align-items: baseline; justify-content: space-between; }
+.product-price { font-family: var(--font-mono); font-size: 18px; font-weight: 700; }
+.owned-tag { font-size: 11px; color: var(--gold); background: rgba(238,203,122,0.08); padding: 3px 8px; border-radius: 100px; }
+
+.product-actions { display: flex; gap: 8px; }
+.btn-mini {
+  flex: 1;
+  padding: 9px 0;
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--border);
+  transition: all 0.15s ease;
+}
+.btn-buy { color: var(--green); }
+.btn-buy:hover { background: var(--green-dim); border-color: var(--green); }
+.btn-sell { color: var(--red); }
+.btn-sell:hover { background: var(--red-dim); border-color: var(--red); }
+.btn-mini:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-reset { color: var(--text-faint); margin-top: 10px; max-width: 200px; }
+.btn-reset:hover { color: var(--red); border-color: var(--red); }
+
+/* ---------------- MODAL ---------------- */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(4, 6, 5, 0.72);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200;
+  animation: fadeIn 0.15s ease;
+  padding: 20px;
+}
+.modal-card {
+  width: 100%; max-width: 380px;
+  background: linear-gradient(160deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  padding: 26px;
+  box-shadow: var(--shadow-panel);
+  animation: modalPop 0.2s ease;
+}
+.modal-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; }
+.modal-eyebrow { font-size: 11px; letter-spacing: 0.12em; color: var(--text-faint); }
+.modal-title { font-family: var(--font-display); font-size: 20px; font-weight: 600; margin-top: 4px; }
+.modal-close { font-size: 22px; color: var(--text-faint); line-height: 1; }
+.modal-close:hover { color: var(--text); }
+.modal-price { font-family: var(--font-mono); font-size: 22px; font-weight: 700; margin-bottom: 18px; }
+.modal-price span { font-size: 12px; color: var(--text-faint); font-weight: 400; }
+.modal-label { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; }
+.qty-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.qty-btn { width: 38px; height: 38px; border-radius: var(--r-sm); background: var(--panel-3); font-size: 18px; }
+.qty-btn:hover { background: var(--border-strong); }
+.qty-input { flex: 1; text-align: center; font-size: 16px; padding: 10px; }
+.link-btn { margin-top: 8px; font-size: 12px; color: var(--green); text-decoration: underline; }
+.modal-total { display: flex; justify-content: space-between; margin: 18px 0; font-size: 14px; color: var(--text-dim); }
+#modalTotal { color: var(--text); font-family: var(--font-mono); font-weight: 700; }
+.btn-confirm {
+  width: 100%; padding: 14px 0;
+  border-radius: var(--r-sm);
+  font-family: var(--font-display);
+  font-weight: 600; font-size: 14px; letter-spacing: 0.04em;
+}
+.btn-confirm-buy { background: var(--green); color: var(--void); }
+.btn-confirm-buy:hover { filter: brightness(1.1); }
+.btn-confirm-sell { background: var(--red); color: var(--void); }
+.btn-confirm-sell:hover { filter: brightness(1.1); }
+
+/* ---------------- AUCTIONS ---------------- */
+.auction-idle {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 90px 20px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--r-lg);
+  gap: 14px;
+}
+.auction-idle-ring {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  border: 3px solid var(--panel-3);
+  border-top-color: var(--green);
+  animation: spin 1.4s linear infinite;
+}
+.auction-idle-text { font-size: 16px; font-weight: 600; }
+.auction-idle-sub { color: var(--text-faint); font-size: 13px; }
+
+.auction-main {
+  background: linear-gradient(160deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 30px;
+}
+.lot-eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.1em; }
+.lot-name { font-family: var(--font-display); font-size: 30px; font-weight: 700; margin-top: 4px; }
+.lot-est { color: var(--text-dim); font-size: 13px; margin-top: 6px; }
+.lot-est strong { color: var(--gold); }
+
+.auction-timer { display: flex; justify-content: center; margin: 28px 0; }
+.timer-ring {
+  width: 110px; height: 110px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 24px; font-weight: 700;
+  background: conic-gradient(var(--green) var(--progress), var(--panel-3) 0);
+  transition: background 0.9s linear;
+}
+.timer-ring::before {
+  content: ""; position: absolute;
+}
+.timer-ring span { background: var(--void); width: 86px; height: 86px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.timer-critical .timer-ring { background: conic-gradient(var(--red) var(--progress), var(--panel-3) 0); animation: pulseScale 0.6s infinite; }
+
+.current-bid-block { text-align: center; margin-bottom: 22px; }
+.current-bid-label { font-size: 12px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; }
+.you-lead { color: var(--gold); }
+.current-bid-amount { display: block; font-family: var(--font-mono); font-size: 36px; font-weight: 700; margin-top: 4px; }
+
+.bid-controls { display: flex; gap: 10px; margin-bottom: 12px; }
+.btn-bid {
+  flex: 1; padding: 14px 0;
+  border-radius: var(--r-sm);
+  background: var(--green); color: var(--void);
+  font-family: var(--font-display); font-weight: 700; font-size: 13.5px;
+}
+.btn-bid:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.btn-bid-alt { background: var(--gold); }
+.custom-bid-row { display: flex; gap: 8px; }
+.custom-bid-row input { flex: 1; }
+
+.auction-side { display: flex; flex-direction: column; gap: 10px; }
+.side-title { font-size: 12px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 6px; }
+.bidder-list { display: flex; flex-direction: column; gap: 8px; }
+.bidder-chip {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px;
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--r-sm);
+  font-size: 13px;
+}
+.bidder-name { font-weight: 600; }
+.bidder-tag { font-size: 11px; color: var(--text-faint); }
+.bidder-leading { border-color: var(--gold); background: rgba(238,203,122,0.06); }
+.bidder-leading .bidder-name { color: var(--gold); }
+
+.bid-log { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; }
+.bid-log-row {
+  display: flex; justify-content: space-between;
+  font-family: var(--font-mono); font-size: 12.5px;
+  padding: 6px 10px;
+  background: var(--panel);
+  border-radius: 6px;
+  color: var(--text-dim);
+}
+.bid-log-player { color: var(--green); background: var(--green-dim); }
+
+/* ---------------- BIDBOSS MOMENT ---------------- */
+.bidboss-backdrop { background: rgba(2,4,3,0.85); }
+.bidboss-card {
+  position: relative;
+  width: 100%; max-width: 420px;
+  background: linear-gradient(165deg, #14140d, #0c0d0a);
+  border: 1px solid var(--gold-deep);
+  border-radius: var(--r-lg);
+  padding: 34px;
+  text-align: center;
+  box-shadow: var(--shadow-gold), var(--shadow-panel);
+  overflow: hidden;
+  animation: modalPop 0.3s cubic-bezier(.2,.9,.3,1.3);
+}
+.bidboss-shine {
+  position: absolute; top: -50%; left: -20%;
+  width: 140%; height: 200%;
+  background: linear-gradient(75deg, transparent 40%, rgba(238,203,122,0.15) 50%, transparent 60%);
+  animation: shineSweep 2.4s ease-in-out infinite;
+}
+.bidboss-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.2em; color: var(--text-faint); position: relative; }
+.bidboss-you-won { font-family: var(--font-display); font-size: 15px; color: var(--gold); letter-spacing: 0.15em; margin-top: 8px; position: relative; }
+.bidboss-lot-name { font-family: var(--font-display); font-size: 26px; font-weight: 700; margin-top: 10px; position: relative; }
+.bidboss-row { display: flex; justify-content: space-around; margin: 22px 0; position: relative; }
+.bidboss-figure { display: flex; flex-direction: column; gap: 4px; }
+.bidboss-figure span { font-size: 11px; color: var(--text-faint); text-transform: uppercase; }
+.bidboss-figure strong { font-family: var(--font-mono); font-size: 18px; }
+.bidboss-gain { font-family: var(--font-mono); font-weight: 700; font-size: 15px; margin-bottom: 20px; position: relative; }
+.gain-pos { color: var(--green); }
+.gain-neg { color: var(--red); }
+.bidboss-stamp {
+  font-family: var(--font-display); font-weight: 700; font-size: 42px;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 30px var(--gold-glow);
+  margin-bottom: 22px;
+  position: relative;
+  animation: stampIn 0.5s cubic-bezier(.2,.9,.3,1.4) 0.15s both;
+}
+.bidboss-card .btn-confirm { position: relative; }
+
+/* ---------------- TOASTS ---------------- */
+.toast {
+  padding: 14px 18px;
+  border-radius: var(--r-md);
+  background: var(--panel-2);
+  border: 1px solid var(--border-strong);
+  font-size: 13px;
+  max-width: 320px;
+  box-shadow: var(--shadow-panel);
+  animation: toastIn 0.25s ease;
+}
+.toast-out { animation: toastOut 0.4s ease forwards; }
+.toast-lost { border-left: 3px solid var(--red); }
+.toast-error { border-left: 3px solid var(--red); color: var(--red); }
+
+/* ---------------- TABLES ---------------- */
+.empire-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.empire-table th {
+  text-align: left; padding: 12px 16px;
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-faint);
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.empire-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.empire-table tr:last-child td { border-bottom: none; }
+.empire-table tbody tr:hover { background: var(--panel); }
+.table-name { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.empty-state { padding: 50px 20px; text-align: center; color: var(--text-faint); border: 1px dashed var(--border-strong); border-radius: var(--r-lg); }
+
+.board-row-player { background: rgba(23,255,160,0.05); }
+.board-rank { font-family: var(--font-mono); color: var(--text-faint); }
+.board-tag { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+.board-worth { font-family: var(--font-mono); font-weight: 700; color: var(--green); }
+.you-badge { font-size: 10px; background: var(--green); color: var(--void); padding: 2px 6px; border-radius: 100px; margin-left: 6px; }
+
+/* ---------------- RANK CARD ---------------- */
+.rank-card {
+  background: linear-gradient(160deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+}
+.rank-card-top { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px; }
+.rank-card-eyebrow { font-size: 11px; color: var(--text-faint); letter-spacing: 0.08em; }
+.rank-card-title { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--gold); margin-top: 4px; }
+.rank-card-next { font-size: 13px; color: var(--text-dim); }
+.rank-card-next strong { color: var(--text); }
+.rank-bar { height: 8px; background: var(--panel-3); border-radius: 100px; overflow: hidden; }
+.rank-bar-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--gold)); border-radius: 100px; transition: width 0.4s ease; }
+.rank-card-sub { margin-top: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); }
+
+.profile-stat {
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--r-md);
+  padding: 16px; display: flex; flex-direction: column; gap: 6px;
+  font-size: 12px; color: var(--text-faint);
+}
+.profile-stat span { font-family: var(--font-mono); font-size: 20px; color: var(--text); font-weight: 700; }
+
+.history-list { display: flex; flex-direction: column; gap: 6px; }
+.history-row {
+  display: flex; justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--panel);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+}
+.history-label { color: var(--text-dim); }
+/* ============================================================
+   BIDBOSS — animations.css
+   All @keyframes in one place.
+   ============================================================ */
+
+@keyframes gridDrift {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 46px 46px, 46px 46px; }
+}
+
+@keyframes tickerScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
+}
+
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(0.94) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; } 50% { opacity: 0.35; }
+}
+
+@keyframes pulseScale {
+  0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); } to { transform: rotate(360deg); }
+}
+
+@keyframes shineSweep {
+  0% { transform: translateX(-30%) rotate(0deg); }
+  100% { transform: translateX(30%) rotate(0deg); }
+}
+
+@keyframes stampIn {
+  0% { opacity: 0; transform: scale(0.4) rotate(-8deg); }
+  60% { opacity: 1; transform: scale(1.12) rotate(2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes flashGold {
+  from { opacity: 1; } to { opacity: 0; }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes toastOut {
+  to { opacity: 0; transform: translateX(30px); }
+}
+
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+/* ============================================================
+   BIDBOSS — data.js
+   Static game data: products, AI trader roster, rank ladder.
+   Keeping this isolated makes it trivial to add regions,
+   products or AI personalities later without touching logic.
+   ============================================================ */
+
+const BIDBOSS_DATA = (() => {
+
+  /* ---------- MARKET PRODUCTS ----------
+     volatility  -> max % swing per tick
+     trendBias   -> long term drift (-1..1), nudged by events
+     category    -> used for iconography / filtering
+  */
+  const PRODUCTS = [
+    { id: "steel",      name: "Steel Billet",        category: "industrial", base: 420,     volatility: 0.03, trendBias: 0.05  },
+    { id: "oil",        name: "Crude Oil Barrel",     category: "industrial", base: 78,      volatility: 0.05, trendBias: -0.02 },
+    { id: "gold",       name: "Gold Bar (1kg)",       category: "precious",   base: 64500,   volatility: 0.015,trendBias: 0.03  },
+    { id: "diamond",    name: "Certified Diamond",    category: "precious",   base: 128000,  volatility: 0.02, trendBias: 0.01  },
+    { id: "chip",       name: "Crypto Chip Array",    category: "tech",       base: 9400,    volatility: 0.07, trendBias: 0.08  },
+    { id: "server",     name: "AI Server Rack",       category: "tech",       base: 41200,   volatility: 0.06, trendBias: 0.1   },
+    { id: "watch",      name: "Vintage Chronograph",  category: "luxury",     base: 18700,   volatility: 0.025,trendBias: 0.02  },
+    { id: "painting",   name: "Rare Oil Painting",    category: "luxury",     base: 96500,   volatility: 0.04, trendBias: 0.015 },
+    { id: "car",        name: "Antique Roadster",     category: "luxury",     base: 154000,  volatility: 0.03, trendBias: 0.02  },
+    { id: "processor",  name: "Quantum Processor",    category: "tech",       base: 210000,  volatility: 0.08, trendBias: 0.12  },
+  ];
+
+  /* ---------- AUCTION-ONLY RARE LOTS ----------
+     These never appear in the open market — only surface in
+     timed auctions, and carry a bigger gap between est. value
+     and typical hammer price (the "BIDBOSS moment" payoff).
+  */
+  const RARE_LOTS = [
+    { id: "lot_processor", name: "Rare Quantum Processor",     estValue: 247000, floor: 140000 },
+    { id: "lot_masterpiece", name: "Lost Renaissance Sketch",  estValue: 410000, floor: 220000 },
+    { id: "lot_meteor",    name: "Certified Meteorite Core",   estValue: 88000,  floor: 45000  },
+    { id: "lot_prototype", name: "Prototype AI Core",          estValue: 560000, floor: 310000 },
+    { id: "lot_diamond",   name: "Flawless Black Diamond",     estValue: 320000, floor: 175000 },
+    { id: "lot_manuscript",name: "18th Century Manuscript",    estValue: 152000, floor: 80000  },
+  ];
+
+  /* ---------- AI TRADERS ----------
+     bidAggression -> 0..1, chance to raise on any given tick
+     bidStep       -> % of current bid they typically raise by
+     capital       -> soft cap on how far they'll push a bid
+     netWorth      -> tracked live, shown on the Bossboard
+  */
+  const AI_TRADERS = [
+    { id: "shark",      name: "The Shark",      tag: "Aggressive & Wealthy",     bidAggression: 0.72, bidStep: [0.04, 0.09], capital: 900000,  netWorth: 640000 },
+    { id: "sniper",     name: "The Sniper",     tag: "Waits, Then Strikes",      bidAggression: 0.30, bidStep: [0.08, 0.15], capital: 700000,  netWorth: 410000 },
+    { id: "hustler",    name: "The Hustler",    tag: "Volume Over Value",        bidAggression: 0.55, bidStep: [0.01, 0.03], capital: 250000,  netWorth: 180000 },
+    { id: "collector",  name: "The Collector",  tag: "Targets Rare Lots",        bidAggression: 0.48, bidStep: [0.05, 0.10], capital: 600000,  netWorth: 520000 },
+    { id: "analyst",    name: "The Analyst",    tag: "Data-Driven",              bidAggression: 0.40, bidStep: [0.02, 0.05], capital: 500000,  netWorth: 350000 },
+    { id: "whale",      name: "The Whale",      tag: "Moves Huge Capital",       bidAggression: 0.60, bidStep: [0.10, 0.20], capital: 2200000, netWorth: 1850000},
+    { id: "gambler",    name: "The Gambler",    tag: "Enormous Risk Appetite",   bidAggression: 0.66, bidStep: [0.06, 0.18], capital: 450000,  netWorth: 260000 },
+    { id: "negotiator", name: "The Negotiator", tag: "Private Deal Specialist",  bidAggression: 0.35, bidStep: [0.03, 0.07], capital: 550000,  netWorth: 400000 },
+  ];
+
+  /* ---------- RANK LADDER ----------
+     Net-worth thresholds map to the BIDBOSS journey from the
+     design doc. `short` is used in compact UI, `title` in full.
+  */
+  const RANKS = [
+    { key: "rookie",       title: "Rookie Trader",        short: "Rookie",     min: 0 },
+    { key: "street",       title: "Street Trader",        short: "Street",     min: 5000 },
+    { key: "local",        title: "Local Trader",         short: "Local",      min: 15000 },
+    { key: "professional", title: "Professional Dealer",  short: "Pro Dealer", min: 50000 },
+    { key: "specialist",   title: "Auction Specialist",   short: "Specialist", min: 150000 },
+    { key: "owner",        title: "Business Owner",       short: "Owner",      min: 400000 },
+    { key: "maker",        title: "Market Maker",         short: "Maker",      min: 1000000 },
+    { key: "tycoon",       title: "Business Tycoon",      short: "Tycoon",     min: 3000000 },
+    { key: "kingmarket",   title: "Market King",          short: "Mkt King",   min: 8000000 },
+    { key: "bidboss",      title: "BIDBOSS",              short: "BIDBOSS",    min: 20000000 },
+  ];
+
+  /* ---------- BOSSBOARD TITLES (by rank position, not net worth tier) ----------
+     `maxIndex` is the highest 0-based board index (0 = #1 overall) that still
+     earns this title. List must stay ordered ascending by maxIndex — the UI
+     takes the first tier whose maxIndex is >= the trader's position.
+  */
+  const BOARD_TITLES = [
+    { maxIndex: 0,        title: "Global BidBoss", icon: "💎" },
+    { maxIndex: 2,        title: "Trade Titan",    icon: "👑" },
+    { maxIndex: 5,        title: "Auction King",   icon: "🥇" },
+    { maxIndex: 7,        title: "Market Shark",   icon: "🥈" },
+    { maxIndex: Infinity, title: "Trade Hustler",  icon: "🥉" },
+  ];
+
+  /* ---------- RANDOM MARKET EVENTS ----------
+     Each event nudges one or more product categories.
+  */
+  const MARKET_EVENTS = [
+    { headline: "Factory shutdown cuts steel output",           category: "industrial", impact: 0.18 },
+    { headline: "OPEC+ trims oil production quotas",            category: "industrial", impact: 0.12 },
+    { headline: "Central bank signals rate hike",                category: "precious",   impact: 0.09 },
+    { headline: "New AI chip breakthrough announced",            category: "tech",       impact: 0.22 },
+    { headline: "Luxury auction house reports record season",    category: "luxury",     impact: 0.15 },
+    { headline: "Global chip shortage eases",                    category: "tech",       impact: -0.14 },
+    { headline: "Gold reserves hit record demand",                category: "precious",   impact: 0.11 },
+    { headline: "Recession fears spook luxury buyers",            category: "luxury",     impact: -0.13 },
+    { headline: "Quantum computing startup raises $2B",           category: "tech",       impact: 0.19 },
+    { headline: "Oversupply floods industrial metals market",     category: "industrial", impact: -0.16 },
+  ];
+
+  return { PRODUCTS, RARE_LOTS, AI_TRADERS, RANKS, BOARD_TITLES, MARKET_EVENTS };
+})();
+/* ============================================================
+   BIDBOSS — player.js
+   Owns player state: cash, inventory, reputation, rank.
+   Persists to localStorage so a session survives a refresh.
+   ============================================================ */
+
+class Player {
+  constructor() {
+    this.name = "You";
+    this.cash = 5000;
+    this.inventory = {};        // { productId: { qty, avgCost } }
+    this.reputation = 50;       // 0-100
+    this.auctionsWon = 0;
+    this.auctionsEntered = 0;
+    this.totalProfit = 0;
+    this.history = [];          // { t, type, label, amount }
+    this.load();
+  }
+
+  /* ---------- persistence ---------- */
+  save() {
+    try {
+      localStorage.setItem("bidboss_save", JSON.stringify({
+        name: this.name, cash: this.cash, inventory: this.inventory,
+        reputation: this.reputation, auctionsWon: this.auctionsWon,
+        auctionsEntered: this.auctionsEntered, totalProfit: this.totalProfit,
+        history: this.history.slice(-40),
+      }));
+    } catch (e) { /* storage unavailable, ignore silently */ }
+  }
+
+  load() {
+    try {
+      const raw = localStorage.getItem("bidboss_save");
+      if (!raw) return;
+      const s = JSON.parse(raw);
+      Object.assign(this, s);
+    } catch (e) { /* corrupt or missing save, start fresh */ }
+  }
+
+  reset() {
+    localStorage.removeItem("bidboss_save");
+    this.cash = 5000;
+    this.inventory = {};
+    this.reputation = 50;
+    this.auctionsWon = 0;
+    this.auctionsEntered = 0;
+    this.totalProfit = 0;
+    this.history = [];
+    this.save();
+  }
+
+  /* ---------- trading ---------- */
+  canAfford(amount) { return this.cash >= amount; }
+
+  buy(productId, qty, unitPrice) {
+    const cost = qty * unitPrice;
+    if (!this.canAfford(cost)) return false;
+    this.cash -= cost;
+    const slot = this.inventory[productId] || { qty: 0, avgCost: 0 };
+    const totalCost = slot.avgCost * slot.qty + cost;
+    slot.qty += qty;
+    slot.avgCost = totalCost / slot.qty;
+    this.inventory[productId] = slot;
+    this.logEvent("buy", `Bought ${qty}× ${productId}`, -cost);
+    this.save();
+    return true;
+  }
+
+  sell(productId, qty, unitPrice) {
+    const slot = this.inventory[productId];
+    if (!slot || slot.qty < qty) return false;
+    const revenue = qty * unitPrice;
+    const costBasis = slot.avgCost * qty;
+    slot.qty -= qty;
+    if (slot.qty <= 0.0001) delete this.inventory[productId];
+    this.cash += revenue;
+    this.totalProfit += (revenue - costBasis);
+    this.logEvent("sell", `Sold ${qty}× ${productId}`, revenue);
+    this.save();
+    return revenue - costBasis;
+  }
+
+  /* called after winning an auction lot (not held as tradeable inventory,
+     but folded into net worth via a direct cash-equivalent asset entry) */
+  acquireLot(lot, price) {
+    this.cash -= price;
+    this.reputation = Math.min(100, this.reputation + 3);
+    this.auctionsWon += 1;
+    this.logEvent("auction_win", `Won "${lot.name}"`, -price);
+    this.save();
+  }
+
+  logEvent(type, label, amount) {
+    this.history.unshift({ t: Date.now(), type, label, amount });
+    if (this.history.length > 60) this.history.length = 60;
+  }
+
+  /* ---------- valuation ---------- */
+  inventoryValue(priceLookup) {
+    let total = 0;
+    for (const [id, slot] of Object.entries(this.inventory)) {
+      const price = priceLookup(id);
+      total += (price || slot.avgCost) * slot.qty;
+    }
+    return total;
+  }
+
+  netWorth(priceLookup) {
+    return this.cash + this.inventoryValue(priceLookup);
+  }
+
+  /* ---------- rank ---------- */
+  currentRank(netWorth) {
+    const ranks = BIDBOSS_DATA.RANKS;
+    let current = ranks[0];
+    for (const r of ranks) {
+      if (netWorth >= r.min) current = r; else break;
+    }
+    return current;
+  }
+
+  nextRank(netWorth) {
+    const ranks = BIDBOSS_DATA.RANKS;
+    for (const r of ranks) {
+      if (netWorth < r.min) return r;
+    }
+    return null; // maxed out
+  }
+
+  rankProgress(netWorth) {
+    const ranks = BIDBOSS_DATA.RANKS;
+    const cur = this.currentRank(netWorth);
+    const next = this.nextRank(netWorth);
+    if (!next) return 1;
+    const span = next.min - cur.min;
+    const progressed = netWorth - cur.min;
+    return Math.max(0, Math.min(1, progressed / span));
+  }
+}
+/* ============================================================
+   BIDBOSS — market.js
+   Drives live price simulation for the open market. Each tick,
+   every product drifts by trendBias plus random noise scaled
+   by volatility. Active MarketEvents apply a temporary skew to
+   an entire category, decaying back to normal over time.
+   ============================================================ */
+
+class MarketEngine {
+  constructor() {
+    this.prices = {};       // productId -> current price
+    this.history = {};      // productId -> [last N prices] for sparklines
+    this.activeEvent = null;// { headline, category, impact, ticksLeft }
+    this.tickCount = 0;
+
+    BIDBOSS_DATA.PRODUCTS.forEach(p => {
+      this.prices[p.id] = p.base;
+      this.history[p.id] = [p.base];
+    });
+  }
+
+  productMeta(id) {
+    return BIDBOSS_DATA.PRODUCTS.find(p => p.id === id);
+  }
+
+  price(id) {
+    return this.prices[id];
+  }
+
+  trend(id) {
+    const h = this.history[id];
+    if (!h || h.length < 2) return 0;
+    const prev = h[h.length - 2];
+    const cur = h[h.length - 1];
+    return (cur - prev) / prev;
+  }
+
+  /* advance the whole market by one tick */
+  tick() {
+    this.tickCount++;
+
+    // maybe spawn a new event
+    if (!this.activeEvent && Math.random() < 0.12) {
+      const template = BIDBOSS_DATA.MARKET_EVENTS[
+        Math.floor(Math.random() * BIDBOSS_DATA.MARKET_EVENTS.length)
+      ];
+      this.activeEvent = { ...template, ticksLeft: 8 + Math.floor(Math.random() * 6) };
+    }
+
+    BIDBOSS_DATA.PRODUCTS.forEach(p => {
+      let price = this.prices[p.id];
+      const noise = (Math.random() * 2 - 1) * p.volatility;
+      let drift = p.trendBias * 0.01;
+
+      if (this.activeEvent && this.activeEvent.category === p.category) {
+        drift += this.activeEvent.impact * 0.02;
+      }
+
+      price = price * (1 + noise + drift);
+      price = Math.max(p.base * 0.25, price); // price floor so nothing goes to zero
+
+      this.prices[p.id] = price;
+      const h = this.history[p.id];
+      h.push(price);
+      if (h.length > 30) h.shift();
+    });
+
+    if (this.activeEvent) {
+      this.activeEvent.ticksLeft--;
+      if (this.activeEvent.ticksLeft <= 0) this.activeEvent = null;
+    }
+  }
+
+  sparkline(id, width = 60, height = 20) {
+    const h = this.history[id];
+    if (h.length < 2) return "";
+    const min = Math.min(...h);
+    const max = Math.max(...h);
+    const range = (max - min) || 1;
+    const step = width / (h.length - 1);
+    return h.map((v, i) => {
+      const x = (i * step).toFixed(1);
+      const y = (height - ((v - min) / range) * height).toFixed(1);
+      return `${x},${y}`;
+    }).join(" ");
+  }
+}
+/* ============================================================
+   BIDBOSS — auctions.js
+   Runs one auction "lot" at a time. AI traders evaluate the
+   current bid against their personality (aggression, capital,
+   step size) each tick and may raise. The player can jump in
+   with a manual bid. When the clock hits zero, the highest
+   bidder wins the lot.
+   ============================================================ */
+
+class AuctionEngine {
+  constructor(onEvent) {
+    this.onEvent = onEvent || (() => {});
+    this.active = null;
+    this.cooldown = 6; // ticks until next auction can start
+  }
+
+  /* pick a lot and spin up a fresh auction */
+  startAuction() {
+    const lot = BIDBOSS_DATA.RARE_LOTS[
+      Math.floor(Math.random() * BIDBOSS_DATA.RARE_LOTS.length)
+    ];
+    // 3-5 AI traders participate per lot, weighted toward collectors on rare items
+    const pool = [...BIDBOSS_DATA.AI_TRADERS];
+    const participants = [];
+    const count = 3 + Math.floor(Math.random() * 3);
+    while (participants.length < count && pool.length) {
+      const idx = Math.floor(Math.random() * pool.length);
+      participants.push({ ...pool.splice(idx, 1)[0] });
+    }
+
+    this.active = {
+      lot,
+      participants,
+      currentBid: lot.floor,
+      leader: participants[Math.random() < 0.5 ? 0 : 1]?.id || participants[0].id,
+      leaderIsPlayer: false,
+      secondsLeft: 20,
+      bidLog: [{ who: participants[0].name, amount: lot.floor, isPlayer: false }],
+      resolved: false,
+    };
+    this.onEvent({ type: "auction_start", lot });
+  }
+
+  playerBid(amount) {
+    const a = this.active;
+    if (!a || a.resolved) return false;
+    if (amount <= a.currentBid) return false;
+    a.currentBid = amount;
+    a.leader = "player";
+    a.leaderIsPlayer = true;
+    a.bidLog.unshift({ who: "You", amount, isPlayer: true });
+    if (a.bidLog.length > 20) a.bidLog.length = 20;
+    // bidding war adds urgency: shave a little time when player jumps in late
+    if (a.secondsLeft > 6) a.secondsLeft = Math.max(6, a.secondsLeft - 1);
+    this.onEvent({ type: "bid", amount, who: "You" });
+    return true;
+  }
+
+  /* advance the auction clock by one second; call every tick */
+  tick() {
+    if (!this.active) {
+      if (this.cooldown > 0) { this.cooldown--; return; }
+      this.startAuction();
+      return;
+    }
+    const a = this.active;
+    if (a.resolved) return;
+
+    // AI decision pass
+    a.participants.forEach(ai => {
+      if (a.leader === ai.id) return; // already leading, no need to raise self
+      if (a.currentBid >= ai.capital) return; // priced out
+      const urgency = a.secondsLeft < 6 ? 1.6 : 1; // AIs get more decisive near the end
+      const willBid = Math.random() < ai.bidAggression * 0.35 * urgency;
+      if (!willBid) return;
+      const [minStep, maxStep] = ai.bidStep;
+      const stepPct = minStep + Math.random() * (maxStep - minStep);
+      let newBid = a.currentBid * (1 + stepPct);
+      newBid = Math.min(newBid, ai.capital);
+      if (newBid <= a.currentBid) return;
+      a.currentBid = Math.round(newBid);
+      a.leader = ai.id;
+      a.leaderIsPlayer = false;
+      a.bidLog.unshift({ who: ai.name, amount: a.currentBid, isPlayer: false });
+      if (a.bidLog.length > 20) a.bidLog.length = 20;
+    });
+
+    a.secondsLeft--;
+    if (a.secondsLeft <= 0) {
+      this.resolve();
+    }
+  }
+
+  resolve() {
+    const a = this.active;
+    if (!a) return;
+    a.resolved = true;
+    const winner = a.leaderIsPlayer ? "player" : a.leader;
+    this.onEvent({ type: "auction_end", lot: a.lot, winner, finalBid: a.currentBid });
+
+    // bump the winning AI's tracked net worth so the Bossboard stays alive
+    if (winner !== "player") {
+      const ai = BIDBOSS_DATA.AI_TRADERS.find(t => t.id === winner);
+      if (ai) ai.netWorth += Math.round(a.lot.estValue - a.currentBid);
+    }
+
+    this.active = null;
+    this.cooldown = 10 + Math.floor(Math.random() * 8);
+  }
+}
+/* ============================================================
+   BIDBOSS — ui.js
+   Pure(ish) rendering functions. Each render* function returns
+   an HTML string for a screen or component; main.js decides
+   when to call them and wires up events via delegation, so this
+   file never needs to know about game state mutation directly.
+   ============================================================ */
+
+const UI = (() => {
+
+  const fmt = (n) => {
+    const sign = n < 0 ? "-" : "";
+    n = Math.abs(n);
+    if (n >= 1e9) return sign + "$" + (n / 1e9).toFixed(2) + "B";
+    if (n >= 1e6) return sign + "$" + (n / 1e6).toFixed(2) + "M";
+    if (n >= 1e3) return sign + "$" + (n / 1e3).toFixed(1) + "K";
+    return sign + "$" + n.toFixed(0);
+  };
+  const fmtFull = (n) => "$" + Math.round(n).toLocaleString("en-US");
+  const pct = (n) => (n >= 0 ? "+" : "") + (n * 100).toFixed(2) + "%";
+
+  const categoryIcon = {
+    industrial: "⚙", precious: "◆", tech: "◈", luxury: "✦",
+  };
+
+  /* ---------------- MAIN MENU ---------------- */
+  function renderMainMenu() {
+    return `
+    <div class="menu-screen">
+      <div class="menu-bg">
+        <div class="menu-grid"></div>
+        <div class="ticker-row" id="menuTicker"></div>
+      </div>
+      <div class="menu-content">
+        <div class="menu-badge">GLOBAL TRADING SIMULATION</div>
+        <h1 class="menu-title">BID<span class="menu-title-accent">BOSS</span></h1>
+        <p class="menu-tagline">BID. TRADE. <span class="tagline-dominate">DOMINATE.</span></p>
+        <button class="btn-play" data-action="play">
+          <span>ENTER THE MARKET</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="menu-stats">
+          <div class="menu-stat"><span>10</span>Market Goods</div>
+          <div class="menu-stat"><span>8</span>Rival Traders</div>
+          <div class="menu-stat"><span>10</span>Ranks to BIDBOSS</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  /* ---------------- APP SHELL / TOPBAR ---------------- */
+  function renderTopbar(player, netWorth, rank) {
+    return `
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">B</span>
+        <span class="brand-name">BIDBOSS</span>
+      </div>
+      <nav class="topnav" id="topnav">
+        ${navItem("market", "Market")}
+        ${navItem("auctions", "Auctions")}
+        ${navItem("empire", "Empire")}
+        ${navItem("bossboard", "Bossboard")}
+        ${navItem("profile", "Profile")}
+      </nav>
+      <div class="topbar-stats">
+        <div class="stat-pill">
+          <span class="stat-label">Rank</span>
+          <span class="stat-value rank-value">${rank.title}</span>
+        </div>
+        <div class="stat-pill cash-pill">
+          <span class="stat-label">Cash</span>
+          <span class="stat-value">${fmtFull(player.cash)}</span>
+        </div>
+        <div class="stat-pill worth-pill">
+          <span class="stat-label">Net Worth</span>
+          <span class="stat-value">${fmtFull(netWorth)}</span>
+        </div>
+      </div>
+    </header>`;
+  }
+
+  function navItem(key, label) {
+    return `<button class="nav-item" data-nav="${key}">${label}</button>`;
+  }
+
+  /* ---------------- MARKET SCREEN ---------------- */
+  function renderMarket(market, player, filter = "all") {
+    const cats = ["all", "industrial", "precious", "tech", "luxury"];
+    const filterRow = cats.map(c =>
+      `<button class="chip ${c === filter ? "chip-active" : ""}" data-filter="${c}">${c === "all" ? "All Goods" : c[0].toUpperCase() + c.slice(1)}</button>`
+    ).join("");
+
+    const products = BIDBOSS_DATA.PRODUCTS.filter(p => filter === "all" || p.category === filter);
+    const cards = products.map(p => {
+      const price = market.price(p.id);
+      const trend = market.trend(p.id);
+      const trendClass = trend > 0.0005 ? "trend-up" : trend < -0.0005 ? "trend-down" : "trend-flat";
+      const owned = player.inventory[p.id];
+      const spark = market.sparkline(p.id, 140, 36);
+      const strokeColor = trend >= 0 ? "var(--green)" : "var(--red)";
+
+      return `
+      <div class="product-card" data-product="${p.id}">
+        <div class="product-card-top">
+          <div class="product-cat-icon">${categoryIcon[p.category] || "◆"}</div>
+          <div class="product-name-block">
+            <div class="product-name">${p.name}</div>
+            <div class="product-cat">${p.category}</div>
+          </div>
+          <div class="product-trend ${trendClass}">${pct(trend)}</div>
+        </div>
+        <svg class="spark" viewBox="0 0 140 36" preserveAspectRatio="none">
+          <polyline points="${spark}" fill="none" stroke="${strokeColor}" stroke-width="2"/>
+        </svg>
+        <div class="product-card-bottom">
+          <div class="product-price">${fmtFull(price)}</div>
+          ${owned ? `<div class="owned-tag">Own ${owned.qty.toFixed(2)}</div>` : ""}
+        </div>
+        <div class="product-actions">
+          <button class="btn-mini btn-buy" data-buy="${p.id}">BUY</button>
+          <button class="btn-mini btn-sell" data-sell="${p.id}" ${owned ? "" : "disabled"}>SELL</button>
+        </div>
+      </div>`;
+    }).join("");
+
+    const eventBanner = market.activeEvent ? `
+      <div class="event-banner">
+        <span class="event-dot"></span>
+        <span class="event-text"><strong>MARKET NEWS —</strong> ${market.activeEvent.headline}</span>
+      </div>` : "";
+
+    return `
+    <div class="screen-inner">
+      <div class="screen-head">
+        <h2>Open Market</h2>
+        <p class="screen-sub">Buy low. Sell high. Watch the tape.</p>
+      </div>
+      ${eventBanner}
+      <div class="chip-row">${filterRow}</div>
+      <div class="product-grid">${cards}</div>
+    </div>`;
+  }
+
+  /* ---------------- BUY/SELL MODAL ---------------- */
+  function renderTradeModal(mode, product, price, owned) {
+    const maxQty = mode === "sell" && owned ? owned.qty : null;
+    return `
+    <div class="modal-backdrop" data-close="modal">
+      <div class="modal-card" data-stop>
+        <div class="modal-head">
+          <div>
+            <div class="modal-eyebrow">${mode === "buy" ? "PLACE ORDER" : "LIQUIDATE"}</div>
+            <div class="modal-title">${product.name}</div>
+          </div>
+          <button class="modal-close" data-close="modal">&times;</button>
+        </div>
+        <div class="modal-price">${fmtFull(price)} <span>/ unit</span></div>
+        <label class="modal-label">Quantity</label>
+        <div class="qty-row">
+          <button class="qty-btn" data-qty-step="-1">−</button>
+          <input type="number" id="tradeQty" class="qty-input" value="1" min="0.01" step="0.01" ${maxQty ? `max="${maxQty}"` : ""}/>
+          <button class="qty-btn" data-qty-step="1">+</button>
+        </div>
+        ${maxQty ? `<button class="link-btn" id="maxQtyBtn">Sell max (${maxQty.toFixed(2)})</button>` : ""}
+        <div class="modal-total">
+          <span>Total</span>
+          <span id="modalTotal">${fmtFull(price)}</span>
+        </div>
+        <button class="btn-confirm ${mode === "buy" ? "btn-confirm-buy" : "btn-confirm-sell"}" id="confirmTrade" data-mode="${mode}" data-product="${product.id}" data-price="${price}">
+          ${mode === "buy" ? "CONFIRM PURCHASE" : "CONFIRM SALE"}
+        </button>
+      </div>
+    </div>`;
+  }
+
+  /* ---------------- AUCTIONS SCREEN ---------------- */
+  function renderAuctions(engine, player) {
+    if (!engine.active) {
+      return `
+      <div class="screen-inner">
+        <div class="screen-head">
+          <h2>Auction House</h2>
+          <p class="screen-sub">Rare lots surface without warning. Stay sharp.</p>
+        </div>
+        <div class="auction-idle">
+          <div class="auction-idle-ring"></div>
+          <div class="auction-idle-text">Next lot goes live in <strong>${engine.cooldown}s</strong></div>
+          <div class="auction-idle-sub">Auctioneers are prepping the floor…</div>
+        </div>
+      </div>`;
+    }
+
+    const a = engine.active;
+    const bidders = a.participants.map(ai => `
+      <div class="bidder-chip ${a.leader === ai.id ? "bidder-leading" : ""}">
+        <span class="bidder-name">${ai.name}</span>
+        <span class="bidder-tag">${ai.tag}</span>
+      </div>`).join("");
+
+    const log = a.bidLog.slice(0, 8).map(l => `
+      <div class="bid-log-row ${l.isPlayer ? "bid-log-player" : ""}">
+        <span>${l.who}</span><span>${fmtFull(l.amount)}</span>
+      </div>`).join("");
+
+    const minNext = Math.round(a.currentBid * 1.03);
+    const playerLeading = a.leaderIsPlayer;
+
+    return `
+    <div class="screen-inner">
+      <div class="screen-head">
+        <h2>Auction House</h2>
+        <p class="screen-sub">Live lot in progress</p>
+      </div>
+      <div class="auction-live">
+        <div class="auction-main">
+          <div class="lot-eyebrow">LOT #${a.lot.id.toUpperCase()}</div>
+          <div class="lot-name">${a.lot.name}</div>
+          <div class="lot-est">Estimated Value <strong>${fmtFull(a.lot.estValue)}</strong></div>
+
+          <div class="auction-timer ${a.secondsLeft <= 5 ? "timer-critical" : ""}">
+            <div class="timer-ring" style="--progress:${(a.secondsLeft / 20) * 100}%">
+              <span>${a.secondsLeft}s</span>
+            </div>
+          </div>
+
+          <div class="current-bid-block">
+            <span class="current-bid-label">Current Bid ${playerLeading ? "· <span class='you-lead'>YOU LEAD</span>" : ""}</span>
+            <span class="current-bid-amount">${fmtFull(a.currentBid)}</span>
+          </div>
+
+          <div class="bid-controls">
+            <button class="btn-bid" data-bid="${minNext}">RAISE TO ${fmt(minNext)}</button>
+            <button class="btn-bid btn-bid-alt" data-bid="${Math.round(a.currentBid * 1.1)}">RAISE TO ${fmt(Math.round(a.currentBid * 1.1))}</button>
+          </div>
+          <div class="custom-bid-row">
+            <input type="number" id="customBid" placeholder="Custom bid amount" min="${a.currentBid + 1}"/>
+            <button class="btn-mini" id="customBidBtn">BID</button>
+          </div>
+        </div>
+
+        <div class="auction-side">
+          <div class="side-title">Bidders (${a.participants.length})</div>
+          <div class="bidder-list">${bidders}</div>
+          <div class="side-title">Live Log</div>
+          <div class="bid-log">${log}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  /* ---------------- BIDBOSS MOMENT ---------------- */
+  function renderBidbossMoment(lot, finalBid) {
+    const gain = lot.estValue - finalBid;
+    const gainPositive = gain >= 0;
+    return `
+    <div class="modal-backdrop bidboss-backdrop" data-close="bidboss">
+      <div class="bidboss-card" data-stop>
+        <div class="bidboss-shine"></div>
+        <div class="bidboss-label">AUCTION COMPLETE</div>
+        <div class="bidboss-you-won">YOU WON</div>
+        <div class="bidboss-lot-name">${lot.name}</div>
+        <div class="bidboss-row">
+          <div class="bidboss-figure">
+            <span>Final Bid</span>
+            <strong>${fmtFull(finalBid)}</strong>
+          </div>
+          <div class="bidboss-figure">
+            <span>Est. Market Value</span>
+            <strong>${fmtFull(lot.estValue)}</strong>
+          </div>
+        </div>
+        <div class="bidboss-gain ${gainPositive ? "gain-pos" : "gain-neg"}">
+          ${gainPositive ? "Potential Gain" : "Overpaid"} ${fmtFull(Math.abs(gain))}
+        </div>
+        <div class="bidboss-stamp">BIDBOSS!</div>
+        <button class="btn-confirm btn-confirm-buy" data-close="bidboss">CONTINUE TRADING</button>
+      </div>
+    </div>`;
+  }
+
+  function renderAuctionLostToast(winnerName, lotName) {
+    return `<div class="toast toast-lost">
+      <strong>${winnerName}</strong> won <strong>${lotName}</strong>. Better luck on the next lot.
+    </div>`;
+  }
+
+  /* ---------------- EMPIRE / INVENTORY SCREEN ---------------- */
+  function renderEmpire(player, market) {
+    const rows = Object.entries(player.inventory).map(([id, slot]) => {
+      const meta = market.productMeta(id);
+      const price = market.price(id);
+      const value = price * slot.qty;
+      const pl = value - (slot.avgCost * slot.qty);
+      const plClass = pl >= 0 ? "pl-pos" : "pl-neg";
+      return `
+      <tr>
+        <td>
+          <div class="table-name">${categoryIcon[meta.category] || "◆"} ${meta.name}</div>
+        </td>
+        <td>${slot.qty.toFixed(2)}</td>
+        <td>${fmtFull(slot.avgCost)}</td>
+        <td>${fmtFull(price)}</td>
+        <td>${fmtFull(value)}</td>
+        <td class="${plClass}">${pl >= 0 ? "+" : ""}${fmtFull(pl)}</td>
+        <td><button class="btn-mini btn-sell" data-sell="${id}">SELL</button></td>
+      </tr>`;
+    }).join("");
+
+    const empty = Object.keys(player.inventory).length === 0;
+
+    return `
+    <div class="screen-inner">
+      <div class="screen-head">
+        <h2>Your Empire</h2>
+        <p class="screen-sub">Everything you currently hold.</p>
+      </div>
+      ${empty ? `<div class="empty-state">No holdings yet. Head to the Market to make your first move.</div>` : `
+      <div class="table-wrap">
+        <table class="empire-table">
+          <thead><tr><th>Asset</th><th>Qty</th><th>Avg Cost</th><th>Price</th><th>Value</th><th>P/L</th><th></th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`}
+    </div>`;
+  }
+
+  /* ---------------- BOSSBOARD ---------------- */
+  function renderBossboard(player, netWorth) {
+    const entries = BIDBOSS_DATA.AI_TRADERS.map(ai => ({
+      name: ai.name, tag: ai.tag, netWorth: ai.netWorth, isPlayer: false,
+    }));
+    entries.push({ name: "You", tag: "Rising Trader", netWorth, isPlayer: true });
+    entries.sort((a, b) => b.netWorth - a.netWorth);
+
+    const rows = entries.map((e, i) => {
+      const boardTitle = BIDBOSS_DATA.BOARD_TITLES.find(t => i <= t.maxIndex);
+      return `
+      <tr class="${e.isPlayer ? "board-row-player" : ""}">
+        <td class="board-rank">#${i + 1}</td>
+        <td>
+          <div class="table-name">${e.name} ${e.isPlayer ? '<span class="you-badge">YOU</span>' : ""}</div>
+          <div class="board-tag">${e.tag}</div>
+        </td>
+        <td class="board-title">${boardTitle.icon} ${boardTitle.title}</td>
+        <td class="board-worth">${fmtFull(e.netWorth)}</td>
+      </tr>`;
+    }).join("");
+
+    return `
+    <div class="screen-inner">
+      <div class="screen-head">
+        <h2>The Bossboard</h2>
+        <p class="screen-sub">Global ranking by net worth.</p>
+      </div>
+      <div class="table-wrap">
+        <table class="empire-table board-table">
+          <thead><tr><th>#</th><th>Trader</th><th>Title</th><th>Net Worth</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }
+
+  /* ---------------- PROFILE ---------------- */
+  function renderProfile(player, netWorth, rank, nextRank, progress) {
+    const winRate = player.auctionsEntered > 0
+      ? Math.round((player.auctionsWon / player.auctionsEntered) * 100) : 0;
+
+    const historyRows = player.history.slice(0, 12).map(h => `
+      <div class="history-row">
+        <span class="history-label">${h.label}</span>
+        <span class="${h.amount >= 0 ? "pl-pos" : "pl-neg"}">${h.amount >= 0 ? "+" : ""}${fmtFull(h.amount)}</span>
+      </div>`).join("") || `<div class="empty-state">No activity yet.</div>`;
+
+    return `
+    <div class="screen-inner">
+      <div class="screen-head">
+        <h2>Profile</h2>
+        <p class="screen-sub">Your journey to BIDBOSS.</p>
+      </div>
+
+      <div class="rank-card">
+        <div class="rank-card-top">
+          <div>
+            <div class="rank-card-eyebrow">CURRENT RANK</div>
+            <div class="rank-card-title">${rank.title}</div>
+          </div>
+          ${nextRank ? `<div class="rank-card-next">Next: <strong>${nextRank.title}</strong></div>` : `<div class="rank-card-next">MAX RANK</div>`}
+        </div>
+        <div class="rank-bar"><div class="rank-bar-fill" style="width:${(progress * 100).toFixed(1)}%"></div></div>
+        ${nextRank ? `<div class="rank-card-sub">${fmtFull(netWorth)} / ${fmtFull(nextRank.min)}</div>` : ""}
+      </div>
+
+      <div class="profile-stats-grid">
+        <div class="profile-stat"><span>${fmtFull(player.totalProfit)}</span>Total Trading Profit</div>
+        <div class="profile-stat"><span>${player.auctionsWon}</span>Auctions Won</div>
+        <div class="profile-stat"><span>${winRate}%</span>Win Rate</div>
+        <div class="profile-stat"><span>${player.reputation}</span>Reputation</div>
+      </div>
+
+      <div class="screen-head" style="margin-top:28px;">
+        <h3>Recent Activity</h3>
+      </div>
+      <div class="history-list">${historyRows}</div>
+
+      <button class="btn-mini btn-reset" id="resetGameBtn">RESET PROGRESS</button>
+    </div>`;
+  }
+
+  return {
+    fmt, fmtFull, pct,
+    renderMainMenu, renderTopbar, renderMarket, renderTradeModal,
+    renderAuctions, renderBidbossMoment, renderAuctionLostToast,
+    renderEmpire, renderBossboard, renderProfile,
+  };
+})();
+/* ============================================================
+   BIDBOSS — main.js
+   Boots the app, owns the game loop, and wires DOM events to
+   the Player / MarketEngine / AuctionEngine via delegation.
+   This is the only file that mutates state AND touches the DOM,
+   keeping data.js / player.js / market.js / auctions.js / ui.js
+   free of cross-concerns.
+   ============================================================ */
+
+(() => {
+  const root = document.getElementById("app");
+
+  const state = {
+    screen: "market",     // market | auctions | empire | bossboard | profile
+    marketFilter: "all",
+    modal: null,           // { type: 'trade', mode, productId } | { type: 'bidboss', lot, finalBid }
+    inGame: false,
+  };
+
+  const player = new Player();
+  const market = new MarketEngine();
+  const auctions = new AuctionEngine(handleAuctionEvent);
+
+  const priceLookup = (id) => market.price(id);
+
+  /* ---------------- BOOT ---------------- */
+  function boot() {
+    renderMenu();
+    startMenuTicker();
+  }
+
+  function renderMenu() {
+    root.innerHTML = UI.renderMainMenu();
+  }
+
+  function startMenuTicker() {
+    const el = document.getElementById("menuTicker");
+    if (!el) return;
+    const items = BIDBOSS_DATA.PRODUCTS.map(p =>
+      `${p.name} ${UI.fmt(p.base)}`
+    );
+    el.innerHTML = [...items, ...items].map(t => `<span>${t}</span>`).join("");
+  }
+
+  function enterGame() {
+    state.inGame = true;
+    renderShell();
+    startLoop();
+  }
+
+  /* ---------------- SHELL ---------------- */
+  function renderShell() {
+    root.innerHTML = `
+      <div id="topbarSlot"></div>
+      <main class="app-main">
+        <div class="screen active" id="screenContent"></div>
+      </main>
+      <div id="modalSlot"></div>
+      <div id="toastSlot" class="toast-slot"></div>
+    `;
+    renderTopbar();
+    renderScreen();
+  }
+
+  function renderTopbar() {
+    const nw = player.netWorth(priceLookup);
+    const rank = player.currentRank(nw);
+    document.getElementById("topbarSlot").innerHTML = UI.renderTopbar(player, nw, rank);
+    document.querySelectorAll("[data-nav]").forEach(btn => {
+      btn.classList.toggle("nav-active", btn.dataset.nav === state.screen);
+    });
+  }
+
+  function renderScreen() {
+    const el = document.getElementById("screenContent");
+    if (!el) return;
+    switch (state.screen) {
+      case "market":
+        el.innerHTML = UI.renderMarket(market, player, state.marketFilter);
+        break;
+      case "auctions":
+        el.innerHTML = UI.renderAuctions(auctions, player);
+        break;
+      case "empire":
+        el.innerHTML = UI.renderEmpire(player, market);
+        break;
+      case "bossboard":
+        el.innerHTML = UI.renderBossboard(player, player.netWorth(priceLookup));
+        break;
+      case "profile": {
+        const nw = player.netWorth(priceLookup);
+        const rank = player.currentRank(nw);
+        const nextRank = player.nextRank(nw);
+        const progress = player.rankProgress(nw);
+        el.innerHTML = UI.renderProfile(player, nw, rank, nextRank, progress);
+        break;
+      }
+    }
+    document.querySelectorAll("[data-nav]").forEach(btn => {
+      btn.classList.toggle("nav-active", btn.dataset.nav === state.screen);
+    });
+  }
+
+  /* ---------------- MODALS ---------------- */
+  function openTradeModal(mode, productId) {
+    const meta = market.productMeta(productId);
+    const price = market.price(productId);
+    const owned = player.inventory[productId];
+    if (mode === "sell" && !owned) return;
+    state.modal = { type: "trade", mode, productId };
+    document.getElementById("modalSlot").innerHTML = UI.renderTradeModal(mode, meta, price, owned);
+    wireTradeModal(price, owned, mode);
+  }
+
+  function wireTradeModal(price, owned, mode) {
+    const qtyInput = document.getElementById("tradeQty");
+    const totalEl = document.getElementById("modalTotal");
+    const updateTotal = () => {
+      const qty = parseFloat(qtyInput.value) || 0;
+      totalEl.textContent = UI.fmtFull(qty * price);
+    };
+    qtyInput.addEventListener("input", updateTotal);
+    document.querySelectorAll("[data-qty-step]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const step = parseFloat(btn.dataset.qtyStep);
+        let val = (parseFloat(qtyInput.value) || 0) + step;
+        qtyInput.value = Math.max(0.01, val).toFixed(2);
+        updateTotal();
+      });
+    });
+    const maxBtn = document.getElementById("maxQtyBtn");
+    if (maxBtn && owned) {
+      maxBtn.addEventListener("click", () => {
+        qtyInput.value = owned.qty.toFixed(2);
+        updateTotal();
+      });
+    }
+  }
+
+  function closeModal() {
+    state.modal = null;
+    document.getElementById("modalSlot").innerHTML = "";
+  }
+
+  function handleAuctionEvent(evt) {
+    if (evt.type === "auction_start") {
+      player.auctionsEntered += 1;
+    }
+    if (evt.type === "auction_end") {
+      if (evt.winner === "player") {
+        player.acquireLot(evt.lot, evt.finalBid);
+        document.getElementById("modalSlot").innerHTML = UI.renderBidbossMoment(evt.lot, evt.finalBid);
+        fireConfetti();
+      } else {
+        const ai = BIDBOSS_DATA.AI_TRADERS.find(t => t.id === evt.winner);
+        showToast(UI.renderAuctionLostToast(ai ? ai.name : "A rival trader", evt.lot.name));
+      }
+    }
+  }
+
+  function showToast(html) {
+    const slot = document.getElementById("toastSlot");
+    if (!slot) return;
+    const wrap = document.createElement("div");
+    wrap.innerHTML = html;
+    const node = wrap.firstElementChild;
+    slot.appendChild(node);
+    setTimeout(() => node.classList.add("toast-out"), 3200);
+    setTimeout(() => node.remove(), 3700);
+  }
+
+  function fireConfetti() {
+    document.body.classList.add("flash-gold");
+    setTimeout(() => document.body.classList.remove("flash-gold"), 700);
+  }
+
+  /* ---------------- EVENT DELEGATION ---------------- */
+  document.addEventListener("click", (e) => {
+    const playBtn = e.target.closest("[data-action='play']");
+    if (playBtn) { enterGame(); return; }
+
+    const navBtn = e.target.closest("[data-nav]");
+    if (navBtn) { state.screen = navBtn.dataset.nav; renderScreen(); renderTopbar(); return; }
+
+    const filterBtn = e.target.closest("[data-filter]");
+    if (filterBtn) { state.marketFilter = filterBtn.dataset.filter; renderScreen(); return; }
+
+    const buyBtn = e.target.closest("[data-buy]");
+    if (buyBtn) { openTradeModal("buy", buyBtn.dataset.buy); return; }
+
+    const sellBtn = e.target.closest("[data-sell]");
+    if (sellBtn) { openTradeModal("sell", sellBtn.dataset.sell); return; }
+
+    const productCard = e.target.closest(".product-card");
+    if (productCard && !e.target.closest("button")) {
+      openTradeModal("buy", productCard.dataset.product); return;
+    }
+
+    const closeTarget = e.target.closest("[data-close]");
+    if (closeTarget && e.target === closeTarget) { closeModal(); return; }
+
+    const confirmBtn = e.target.closest("#confirmTrade");
+    if (confirmBtn) {
+      const mode = confirmBtn.dataset.mode;
+      const productId = confirmBtn.dataset.product;
+      const price = parseFloat(confirmBtn.dataset.price);
+      const qty = parseFloat(document.getElementById("tradeQty").value) || 0;
+      if (qty <= 0) return;
+      if (mode === "buy") {
+        const ok = player.buy(productId, qty, price);
+        if (!ok) showToast(`<div class="toast toast-error">Not enough cash for that order.</div>`);
+      } else {
+        player.sell(productId, qty, price);
+      }
+      closeModal();
+      renderScreen();
+      renderTopbar();
+      return;
+    }
+
+    const bidBtn = e.target.closest("[data-bid]");
+    if (bidBtn) {
+      const amount = parseInt(bidBtn.dataset.bid, 10);
+      if (player.cash < amount) { showToast(`<div class="toast toast-error">You can't cover that bid.</div>`); return; }
+      auctions.playerBid(amount);
+      renderScreen();
+      return;
+    }
+
+    const customBidBtn = e.target.closest("#customBidBtn");
+    if (customBidBtn) {
+      const input = document.getElementById("customBid");
+      const amount = parseInt(input.value, 10);
+      if (!amount) return;
+      if (player.cash < amount) { showToast(`<div class="toast toast-error">You can't cover that bid.</div>`); return; }
+      auctions.playerBid(amount);
+      renderScreen();
+      return;
+    }
+
+    const resetBtn = e.target.closest("#resetGameBtn");
+    if (resetBtn) {
+      if (confirm("Reset all progress? This cannot be undone.")) {
+        player.reset();
+        renderScreen();
+        renderTopbar();
+      }
+      return;
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && state.modal) closeModal();
+  });
+
+  /* ---------------- GAME LOOP ---------------- */
+  let marketTickCounter = 0;
+  function startLoop() {
+    setInterval(() => {
+      marketTickCounter++;
+      if (marketTickCounter % 3 === 0) market.tick(); // prices move every 3s
+      auctions.tick();                                 // auction clock every 1s
+
+      // idle drift for AI net worth so the Bossboard feels alive
+      if (marketTickCounter % 5 === 0) {
+        BIDBOSS_DATA.AI_TRADERS.forEach(ai => {
+          const drift = (Math.random() * 2 - 1) * ai.netWorth * 0.004;
+          ai.netWorth = Math.max(50000, ai.netWorth + drift);
+        });
+      }
+
+      if (state.screen === "market" || state.screen === "auctions" || state.screen === "bossboard") {
+        renderScreen();
+      }
+      renderTopbar();
+    }, 1000);
+  }
+
+  boot();
+})();
+
+</script>
+
+</body>
+</html>
